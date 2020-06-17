@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aggservice
+spec:
+  selector:
+    app: aggservice
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+          name: aggservice
+spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: aggservice
+          template:
+            metadata:
+              labels:
+                app: aggservice
+            spec:
+              containers:
+                - name: service1
+                  image: rajeshramawat/aggservice
+                  ports:
+                    - containerPort: 8080
+                  env:
+                    - name: JAEGER_UDP_HOST_WITH_PORT
+                      valueFrom: 
+                            configMapKeyRef:
+                                name: jaegerenv
+                                key: jaeger-host-with-port
+                    - name: JAEGER_HTTP_URL
+                      valueFrom: 
+                            configMapKeyRef:
+                                name: jaegerenv
+                                key: jaeger-http-url
+                  imagePullPolicy: Always

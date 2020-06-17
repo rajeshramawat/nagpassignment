@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysqldb
+data:
+  database-name: "restapi"
+  database-service: "mysql-demo-project"
+  database-port: 3306

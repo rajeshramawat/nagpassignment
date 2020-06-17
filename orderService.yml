@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaegerenv
+data:
+  jaeger-host-with-port: "35.184.114.135:80"
+  jaeger-http-url: "10.0.10.53:6831"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice
+  labels:
+    app: orderservice
+spec:
+  selector:
+    app: orderservice
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+      name: orderservice
+spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: orderservice
+      template:
+        metadata:
+          labels:
+            app: orderservice
+        spec:
+          containers:
+            - name: orderservice
+              image: rajeshramawat/orderservice
+              ports:
+                - containerPort: 8080
+              env:
+                - name: JAEGER_UDP_HOST_WITH_PORT
+                  valueFrom: 
+                        configMapKeyRef:
+                            name: jaegerenv
+                            key: jaeger-host-with-port
+                - name: JAEGER_HTTP_URL
+                  valueFrom: 
+                        configMapKeyRef:
+                            name: jaegerenv
+                            key: jaeger-http-url
+              imagePullPolicy: Always

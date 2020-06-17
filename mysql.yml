@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-demo-project
+spec:
+  selector:
+    app: mysql-demo-project
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+    name: mysql-demo-project
+spec:
+    selector:
+        matchLabels:
+            app: mysql-demo-project
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app: mysql-demo-project
+        spec:
+            containers:
+              - image: mysql:5.6
+                name: mysql-demo-project
+                env:
+                    - name: MYSQL_ROOT_PASSWORD
+                      value: password
+                ports:
+                    - containerPort: 3306
+                      name: mysql
+                volumeMounts:
+                    - name: mysql-persistent-storage
+                      mountPath: /var/lib/mysql
+            volumes:
+                - name: mysql-persistent-storage
+                  persistentVolumeClaim:
+                    claimName: mysql-pv-claim
